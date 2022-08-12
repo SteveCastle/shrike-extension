@@ -5,14 +5,11 @@
   <img src="shrike.png">
 </p>
 
-
+A browser extension to run a shell command with dynamic arguments and the current tab URL.
+The extension requires a Go webserver to execute a shell command with the provided arguments and URL. The server accepts a POST request containing json from the extension in the form `{"Command":"echo", "Arguments":["https://example.com"]}`
 
 https://user-images.githubusercontent.com/1828509/184451372-e95ecff9-05f0-4c09-8162-7659c2cd4d93.mp4
 
-
-
-A browser extension to run a shell command with dynamic arguments and the current tab URL.
-The extension requires a Go webserver to execute a shell command with the provided arguments and URL. The server accepts a POST request containing json from the extension in the form `{"Command":"echo", "Arguments":["https://example.com"]}`
 
 ## Dependencies
 
