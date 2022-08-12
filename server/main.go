@@ -52,9 +52,13 @@ func worker(c Command, doneChan *chan struct{}, o *Options) {
 
 	log.Printf("Finished: %s %v", c.Command, c.Arguments)
 }
+
 func createDownloadHandler(o *Options) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, req *http.Request) {
 		enableCors(&w)
+		if (*req).Method == "OPTIONS" {
+			return
+		}
 		var c Command
 		err := json.NewDecoder(req.Body).Decode(&c)
 		if err != nil {
