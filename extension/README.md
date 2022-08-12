@@ -1,3 +1,8 @@
+**Dependencies**
+
+-   [Install Node](https://nodejs.org/en/download/)
+-   [Install Yarn](https://yarnpkg.com/lang/en/docs/install/)
+
 **Getting Started**
 
 Run the following commands to install dependencies and start developing
