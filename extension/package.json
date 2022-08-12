@@ -1,0 +1,74 @@
+{
+    "name": "react-typescript-chrome-extension-starter",
+    "version": "2.0.0",
+    "description": "Web Extension starter kit built with React, TypeScript, Tailwind CSS, EsLint, Prettier & Webpack",
+    "main": "index.js",
+    "scripts": {
+        "build": "webpack --config webpack.prod.js",
+        "dev": "webpack -w --config webpack.dev.js",
+        "test": "jest --config=jest.config.js",
+        "lint": "eslint --fix -c ./.eslintrc.js \"src/**/*.ts*\"",
+        "prettify": "prettier --write \"src/**/*.ts*\""
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/aeksco/react-typescript-chrome-extension-starter.git"
+    },
+    "keywords": [
+        "react",
+        "typescript",
+        "chrome",
+        "extension",
+        "boilerplate"
+    ],
+    "author": "Alexander Schwartzberg",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/aeksco/react-typescript-chrome-extension-starter/issues"
+    },
+    "homepage": "https://github.com/aeksco/react-typescript-chrome-extension-starter#readme",
+    "devDependencies": {
+        "@babel/core": "^7.18.10",
+        "@babel/preset-env": "^7.18.10",
+        "@babel/preset-typescript": "^7.18.6",
+        "@types/chrome": "^0.0.193",
+        "@types/jest": "^28.1.6",
+        "@types/node": "^18.7.1",
+        "@types/react": "^18.0.17",
+        "@types/react-dom": "^18.0.6",
+        "@types/react-test-renderer": "^18.0.0",
+        "@types/webextension-polyfill": "^0.9.0",
+        "@typescript-eslint/eslint-plugin": "^5.33.0",
+        "@typescript-eslint/parser": "^5.33.0",
+        "autoprefixer": "^10.4.8",
+        "awesome-typescript-loader": "^5.2.1",
+        "babel-core": "^6.26.3",
+        "babel-jest": "^28.1.3",
+        "babel-loader": "^8.2.5",
+        "css-loader": "^6.7.1",
+        "eslint": "^8.21.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-prettier": "^4.2.1",
+        "eslint-plugin-react": "^7.30.1",
+        "jest": "^28.1.3",
+        "jest-css-modules": "^2.1.0",
+        "postcss": "^8.4.16",
+        "postcss-loader": "^7.0.1",
+        "prettier": "^2.7.1",
+        "react-test-renderer": "^18.2.0",
+        "tailwindcss": "^3.1.8",
+        "ts-jest": "^28.0.7",
+        "ts-loader": "^9.3.1",
+        "typescript": "^4.7.4",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0",
+        "webpack-merge": "^5.8.0"
+    },
+    "dependencies": {
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "style-loader": "^3.3.1",
+        "webextension-polyfill": "^0.9.0",
+        "webextension-polyfill-ts": "^0.26.0"
+    }
+}

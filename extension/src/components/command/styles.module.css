@@ -1,0 +1,157 @@
+.btn {
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    width: 100%;
+    color: #272822;
+    font-weight: bold;
+    background-color: #a6e22e;
+}
+
+.btn:hover {
+    background-color: #7ca923;
+    color: #272822;
+}
+
+.addArg {
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    margin: 4px;
+    padding: 0 8px;
+    color: #f8f8f2;
+    background-color: #75715e;
+    font-size: 1rem;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.addArg:hover {
+    background-color: #525047;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    color: #f8f8f2;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.command {
+    cursor: pointer;
+    font-size: 1rem;
+    color: #f8f8f2;
+    padding: 4px;
+    border-radius: 4px;
+    display: inline-flex;
+    margin-right: 0.5rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: unset;
+    word-wrap: unset;
+    overflow-wrap: unset;
+}
+
+.command:hover {
+    background-color: #75715e;
+}
+
+.arg {
+    cursor: pointer;
+    font-size: 1rem;
+    color: #fd971f;
+    padding: 2px 4px;
+    border-radius: 4px;
+    display: inline-flex;
+    margin-right: 4px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: unset;
+    word-wrap: unset;
+    overflow-wrap: unset;
+}
+
+.arg:hover {
+    background-color: #75715e;
+}
+
+.url {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #f92672;
+    padding: 4px;
+    border-radius: 4px;
+    display: inline-flex;
+    margin-left: 0.5rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: unset;
+    word-wrap: unset;
+    overflow-wrap: unset;
+}
+
+.editor {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    overflow: auto;
+}
+
+.editor input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background-color: #f8f8f2;
+    color: #272822;
+    font-size: 1rem;
+    padding: 4px;
+    border-radius: 4px;
+    margin: 4px 4px;
+}
+
+.saveButton {
+    color: #272822;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    background-color: #a6e22e;
+    padding: 4px;
+    margin: 0;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.saveButton:hover {
+    background-color: #88b828;
+}
+
+.removeButton {
+    color: #272822;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    background-color: #f92672;
+    padding: 4px;
+    margin: 0;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.removeButton:hover {
+    background-color: #b61e56;
+}
