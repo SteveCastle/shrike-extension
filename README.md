@@ -4,6 +4,7 @@
 <p align="center">
   <img src="shrike.png">
 </p>
+
 **WARNING: Do not allow the port being used by the web server to be accessed from outside of localhost, and preferabbly don't run the server when you're not using the extension. This project is experimental and intended for software developers.**
 
 A browser extension to run a shell command with dynamic arguments and the current tab URL.
