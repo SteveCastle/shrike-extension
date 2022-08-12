@@ -10,7 +10,7 @@ The extension requires a Go webserver to execute a shell command with the provid
 
 https://user-images.githubusercontent.com/1828509/184451372-e95ecff9-05f0-4c09-8162-7659c2cd4d93.mp4
 
-
+*** Do not allow the port being used by the web server to be accessed from outside of localhost, and preferabbly don't run the server when you're not using the extension. This project is just for people who know what they're doing. ***
 ## Dependencies
 
 - Install GO (To Build the Server). https://go.dev/
