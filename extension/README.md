@@ -15,11 +15,12 @@ yarn dev
 **Scripts**
 
 -   `yarn dev` - run `webpack` in `watch` mode
--   `yarn storybook` - runs the Storybook server
 -   `yarn build` - builds the production-ready unpacked extension
 -   `yarn test -u` - runs Jest + updates test snapshots
 -   `yarn lint` - runs EsLint
 -   `yarn prettify` - runs Prettier
+
+**_ If you are using firefox the V3 extension manifest is not supported. Before following these steps. Rename `manifest.json` to `manifest-v3.json` and rename `manifest-v2.json` to `manifest.json` _**
 
 <details>
   <summary>Loading the extension in Google Chrome</summary>
