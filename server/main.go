@@ -54,14 +54,16 @@ func worker(c Command, doneChan *chan struct{}, o *Options) {
 }
 func createDownloadHandler(o *Options) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, req *http.Request) {
+		enableCors(&w)
 		var c Command
 		err := json.NewDecoder(req.Body).Decode(&c)
-		doneChan := make(chan struct{})
 		if err != nil {
-			log.Println(err)
+			log.Println("Error decoding JSON: ", err)
 		}
+		doneChan := make(chan struct{})
+
 		go worker(c, &doneChan, o)
-		fmt.Fprintf(w, "Ran Command: %+v ", c)
+		fmt.Fprintf(w, "Sent Command: %+v ", c)
 	}
 	return fn
 }
@@ -101,4 +103,13 @@ func newRouter(o *Options) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/", createDownloadHandler(o))
 	return r
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
+	(*w).Header().Set("Access-Control-Expose-Headers", "Content-Length")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }

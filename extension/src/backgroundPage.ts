@@ -1,34 +1,28 @@
 import browser from "webextension-polyfill";
 
-// Listen for messages sent from other parts of the extension
-browser.runtime.onMessage.addListener((request: { popupMounted: boolean }) => {
-    // Log statement if request.popupMounted is true
-    // NOTE: this request is sent in `popup/component.tsx`
-    if (request.popupMounted) {
-        console.log("backgroundPage notified that Popup.tsx has mounted.");
-    }
-});
+type CommandData = { Command: string; Args: string[] };
 
-const runCommand = (data: string) => {
+const runCommand = (data: CommandData) => {
     async function callCommandServer() {
-        const results = await fetch("http://localhost:8090", {
+        const response = await fetch("http://localhost:8090", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: data,
+            body: JSON.stringify(data),
         });
-        const json = await results.json();
-        console.log(json);
+        const text = await response.text();
+        console.log(text);
     }
     callCommandServer();
 };
 
 browser.runtime.onMessage.addListener(
-    (request: { message: string; data: string }) => {
-        console.log(request);
+    (request: { message: string; data: CommandData }) => {
+        console.log("running Listener");
+        console.log(request.data);
         switch (request.message) {
-            case "save": {
+            case "runCommand": {
                 runCommand(request.data);
                 break;
             }

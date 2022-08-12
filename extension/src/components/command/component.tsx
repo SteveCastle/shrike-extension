@@ -16,11 +16,11 @@ function download(command: string, args: string[], url: string): void {
                 return;
             }
             chrome.runtime.sendMessage({
-                message: "save",
-                data: JSON.stringify({
+                message: "runCommand",
+                data: {
                     Command: command,
                     Arguments: [...args, url],
-                }),
+                },
             });
         });
 }
