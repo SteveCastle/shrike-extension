@@ -77,6 +77,7 @@ func createDownloadHandler(o *Options) http.HandlerFunc {
 		err := json.NewDecoder(req.Body).Decode(&c)
 		if err != nil {
 			log.Println("Error decoding JSON: ", err)
+			return
 		}
 
 		if !isCommandAllowed(c.Command) {
