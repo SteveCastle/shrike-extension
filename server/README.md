@@ -1,6 +1,6 @@
 ## Command Line Extension Server
 
-A webserver to pass URLs and arguments to a CLI program. Accepts a POST request containing json in the form `{"URL":"http://example.com", Arguments: ["arg1", "arg2"]}`.
+A webserver to pass URLs and arguments to a CLI program. Accepts a POST request containing json in the form `{"Command":"echo", Arguments: ["arg1", "http://example.com"]}`.
 
 ## Dependencies
 
@@ -11,4 +11,4 @@ A webserver to pass URLs and arguments to a CLI program. Accepts a POST request 
 - Clone the repository.
 - Change directory into the project directory.
 - Build the server by running `go build .`
-- Run the server with `./gde"`.
+- Run the server with `./server"`.
