@@ -44,7 +44,7 @@ func worker(c Command, doneChan *chan struct{}, o *Options) {
 				downloadCommand.Stdout = nil
 				continue
 			}
-			log.Printf("%s", line)
+			fmt.Fprintln(os.Stdout, line)
 		case line, open := <-downloadCommand.Stderr:
 			if !open {
 				downloadCommand.Stderr = nil
@@ -69,7 +69,8 @@ func isCommandAllowed(command string) bool {
 func createDownloadHandler(o *Options) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, req *http.Request) {
 		enableCors(&w)
-		fmt.Printf("%s %s\n", req.RemoteAddr, req.Host)
+		log.Printf("Request: %s %s\n", req.RemoteAddr, req.Host)
+
 		if (*req).Method == "OPTIONS" {
 			return
 		}

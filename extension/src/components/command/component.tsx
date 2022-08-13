@@ -3,7 +3,7 @@ import css from "./styles.module.css";
 import { browser, Tabs } from "webextension-polyfill-ts";
 import { useLocalStorage } from "../../useLocalStorage";
 
-function download(command: string, args: string[], url: string): void {
+function download(command: string, args: string[]): void {
     // Query for the active tab in the current window
     browser.tabs
         .query({ active: true, currentWindow: true })
@@ -19,7 +19,7 @@ function download(command: string, args: string[], url: string): void {
                 message: "runCommand",
                 data: {
                     Command: command,
-                    Arguments: [...args, url],
+                    Arguments: [...args, currentTab.url],
                 },
             });
         });
@@ -92,7 +92,7 @@ export function Command() {
                 <button
                     className={css.btn}
                     onClick={() => {
-                        download(command, args, tab?.url || "");
+                        download(command, args);
                     }}
                 >
                     RUN
