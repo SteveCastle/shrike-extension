@@ -125,7 +125,9 @@ export function Command() {
                     className={css.saveButton}
                     onClick={() => {
                         if (showEditor.key === "CREATE_ARGUMENT") {
-                            setArgs((args) => [...args, editorValue]);
+                            if (editorValue.length > 0) {
+                                setArgs((args) => [...args, editorValue]);
+                            }
                         } else if (showEditor.key === "ARGUMENT") {
                             setArgs((args) => {
                                 args[showEditor.index] = editorValue;
