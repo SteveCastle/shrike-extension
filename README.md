@@ -21,6 +21,7 @@ https://user-images.githubusercontent.com/1828509/184451372-e95ecff9-05f0-4c09-8
 
 - Clone the repository from GitHub.
 - Change directory into the project directory. Then into the server directory `cd shrike/server`.
+- Modify the command whiteList in `main.go` to allow specific commands to be run.
 - Build the server by running `go build .`
 
 ## Setup

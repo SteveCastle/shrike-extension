@@ -15,6 +15,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Only commands in this list will be allowed to be executed.
+// TODO: Load from file dynamically.
+var whiteList = []string{"echo", "cowsay"}
+
 type Command struct {
 	Command   string
 	Arguments []string
@@ -53,9 +57,19 @@ func worker(c Command, doneChan *chan struct{}, o *Options) {
 	log.Printf("Finished: %s %v", c.Command, c.Arguments)
 }
 
+func isCommandAllowed(command string) bool {
+	for _, c := range whiteList {
+		if c == command {
+			return true
+		}
+	}
+	return false
+}
+
 func createDownloadHandler(o *Options) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, req *http.Request) {
 		enableCors(&w)
+		fmt.Printf("%s %s\n", req.RemoteAddr, req.Host)
 		if (*req).Method == "OPTIONS" {
 			return
 		}
@@ -64,6 +78,12 @@ func createDownloadHandler(o *Options) http.HandlerFunc {
 		if err != nil {
 			log.Println("Error decoding JSON: ", err)
 		}
+
+		if !isCommandAllowed(c.Command) {
+			log.Println("Command not allowed: ", c.Command)
+			return
+		}
+
 		doneChan := make(chan struct{})
 
 		go worker(c, &doneChan, o)
