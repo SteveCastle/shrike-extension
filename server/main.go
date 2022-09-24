@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/go-cmd/cmd"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -27,9 +28,20 @@ type Command struct {
 type Options struct {
 	ConcurrentCommands int
 }
+type Job struct {
+	Command   Command
+	StartTime time.Time
+	EndTime   time.Time
+	Status    string
+}
 
-func worker(c Command, doneChan *chan struct{}, o *Options) {
+type Status struct {
+	RunningCommands map[string]Job
+}
+
+func worker(c Command, doneChan *chan struct{}, o *Options, s *Status, jobId string) {
 	defer close(*doneChan)
+	s.RunningCommands[jobId] = Job{Command: c, StartTime: time.Now(), Status: "Running"}
 	log.Printf("Starting: %s ", c.Command)
 	cmdOptions := cmd.Options{
 		Buffered:  false,
@@ -53,7 +65,11 @@ func worker(c Command, doneChan *chan struct{}, o *Options) {
 			fmt.Fprintln(os.Stderr, line)
 		}
 	}
-
+	if entry, ok := s.RunningCommands[jobId]; ok {
+		entry.Status = "Done"
+		entry.EndTime = time.Now()
+		s.RunningCommands[jobId] = entry
+	}
 	log.Printf("Finished: %s %v", c.Command, c.Arguments)
 }
 
@@ -66,7 +82,7 @@ func isCommandAllowed(command string) bool {
 	return false
 }
 
-func createDownloadHandler(o *Options) http.HandlerFunc {
+func createDownloadHandler(o *Options, s *Status) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, req *http.Request) {
 		enableCors(&w)
 		log.Printf("Request: %s %s\n", req.RemoteAddr, req.Host)
@@ -85,11 +101,36 @@ func createDownloadHandler(o *Options) http.HandlerFunc {
 			log.Println("Command not allowed: ", c.Command)
 			return
 		}
+		runningCommands := 0
+		for _, job := range s.RunningCommands {
+			if job.Status == "Running" {
+				runningCommands++
+			}
+		}
+		if o.ConcurrentCommands > 0 && runningCommands >= o.ConcurrentCommands {
+			log.Println("Too many commands running.")
+			return
+		}
 
 		doneChan := make(chan struct{})
+		jobId := uuid.New().String()
+		go worker(c, &doneChan, o, s, jobId)
+		reponse := map[string]string{"jobId": jobId}
+		json.NewEncoder(w).Encode(reponse)
+	}
+	return fn
+}
 
-		go worker(c, &doneChan, o)
-		fmt.Fprintf(w, "Sent Command: %+v ", c)
+func createStatusHandler(o *Options, s *Status) http.HandlerFunc {
+	fn := func(w http.ResponseWriter, req *http.Request) {
+		enableCors(&w)
+		log.Printf("Request: %s %s\n", req.RemoteAddr, req.Host)
+
+		if (*req).Method == "OPTIONS" {
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(s)
 	}
 	return fn
 }
@@ -98,7 +139,8 @@ func main() {
 	concurrentCommands := flag.Int("c", 0, "Number of commands to run concurrently. 0 for unlimited.")
 	flag.Parse()
 	options := &Options{ConcurrentCommands: *concurrentCommands}
-	r := newRouter(options)
+	status := &Status{RunningCommands: make(map[string]Job)}
+	r := newRouter(options, status)
 
 	srv := &http.Server{
 		Handler:      r,
@@ -125,9 +167,11 @@ func main() {
 	os.Exit(0)
 }
 
-func newRouter(o *Options) *mux.Router {
+func newRouter(o *Options, s *Status) *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/", createDownloadHandler(o))
+	r.HandleFunc("/", createDownloadHandler(o, s))
+	r.HandleFunc("/status", createStatusHandler(o, s))
+
 	return r
 }
 
