@@ -18,7 +18,7 @@ import (
 
 // Only commands in this list will be allowed to be executed.
 // TODO: Load from file dynamically.
-var whiteList = []string{"echo", "cowsay"}
+var whiteList = []string{"ffmpeg", "echo"}
 
 type Command struct {
 	Command   string
@@ -33,16 +33,19 @@ type Job struct {
 	StartTime time.Time
 	EndTime   time.Time
 	Status    string
+	Ctx       context.Context    `json:"-"`
+	Cancel    context.CancelFunc `json:"-"`
 }
 
 type Status struct {
 	RunningCommands map[string]Job
 }
 
-func worker(c Command, doneChan *chan struct{}, o *Options, s *Status, jobId string) {
+func worker(c Command, doneChan *chan struct{}, o *Options, s *Status, jobId string, ctx context.Context, cancel context.CancelFunc) {
 	defer close(*doneChan)
-	s.RunningCommands[jobId] = Job{Command: c, StartTime: time.Now(), Status: "Running"}
+	s.RunningCommands[jobId] = Job{Command: c, StartTime: time.Now(), Status: "Running", Ctx: ctx, Cancel: cancel}
 	log.Printf("Starting: %s ", c.Command)
+
 	cmdOptions := cmd.Options{
 		Buffered:  false,
 		Streaming: true,
@@ -63,6 +66,15 @@ func worker(c Command, doneChan *chan struct{}, o *Options, s *Status, jobId str
 				continue
 			}
 			fmt.Fprintln(os.Stderr, line)
+		case <-ctx.Done():
+			log.Printf("Canceling: %s ", c.Command)
+			downloadCommand.Stop()
+			if entry, ok := s.RunningCommands[jobId]; ok {
+				entry.Status = "Cancelled"
+				entry.EndTime = time.Now()
+				s.RunningCommands[jobId] = entry
+				return
+			}
 		}
 	}
 	if entry, ok := s.RunningCommands[jobId]; ok {
@@ -114,7 +126,8 @@ func createDownloadHandler(o *Options, s *Status) http.HandlerFunc {
 
 		doneChan := make(chan struct{})
 		jobId := uuid.New().String()
-		go worker(c, &doneChan, o, s, jobId)
+		ctx, cancel := context.WithCancel(context.Background())
+		go worker(c, &doneChan, o, s, jobId, ctx, cancel)
 		reponse := map[string]string{"jobId": jobId}
 		json.NewEncoder(w).Encode(reponse)
 	}
@@ -130,7 +143,30 @@ func createStatusHandler(o *Options, s *Status) http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
+
 		json.NewEncoder(w).Encode(s)
+	}
+	return fn
+}
+
+func createCancelHandler(o *Options, s *Status) http.HandlerFunc {
+	fn := func(w http.ResponseWriter, req *http.Request) {
+		enableCors(&w)
+		log.Printf("Request: %s %s\n", req.RemoteAddr, req.Host)
+
+		if (*req).Method == "OPTIONS" {
+			return
+		}
+		vars := mux.Vars(req)
+		jobId := vars["jobId"]
+		if entry, ok := s.RunningCommands[jobId]; ok {
+			fmt.Println("calling cancel")
+			entry.Cancel()
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		responseStatus := map[string]string{"status": "ok"}
+		json.NewEncoder(w).Encode(responseStatus)
 	}
 	return fn
 }
@@ -171,7 +207,7 @@ func newRouter(o *Options, s *Status) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/", createDownloadHandler(o, s))
 	r.HandleFunc("/status", createStatusHandler(o, s))
-
+	r.HandleFunc("/{jobId}/cancel", createCancelHandler(o, s))
 	return r
 }
 
