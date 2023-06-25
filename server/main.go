@@ -18,7 +18,7 @@ import (
 
 // Only commands in this list will be allowed to be executed.
 // TODO: Load from file dynamically.
-var whiteList = []string{"ffmpeg", "echo"}
+var whiteList = []string{"echo"}
 
 type Command struct {
 	Command   string
@@ -38,7 +38,9 @@ type Job struct {
 }
 
 type Status struct {
+	QueuedCommands   []Job
 	RunningCommands map[string]Job
+	CompletedCommands []Job
 }
 
 func worker(c Command, doneChan *chan struct{}, o *Options, s *Status, jobId string, ctx context.Context, cancel context.CancelFunc) {
@@ -75,12 +77,31 @@ func worker(c Command, doneChan *chan struct{}, o *Options, s *Status, jobId str
 				s.RunningCommands[jobId] = entry
 				return
 			}
+			if len(s.QueuedCommands) > 0 {
+				job := s.QueuedCommands[0]
+				s.QueuedCommands = s.QueuedCommands[1:]
+				doneChan := make(chan struct{})
+				jobId := uuid.New().String()
+				ctx, cancel := context.WithCancel(context.Background())
+				go worker(job.Command, &doneChan, o, s, jobId, ctx, cancel)
+			}
 		}
 	}
 	if entry, ok := s.RunningCommands[jobId]; ok {
 		entry.Status = "Done"
 		entry.EndTime = time.Now()
-		s.RunningCommands[jobId] = entry
+		// Delete from running commands and add to completed commands
+		delete(s.RunningCommands, jobId)
+		s.CompletedCommands = append(s.CompletedCommands, entry)
+	}
+	//Take the next job from the queue
+	if len(s.QueuedCommands) > 0 {
+		job := s.QueuedCommands[0]
+		s.QueuedCommands = s.QueuedCommands[1:]
+		doneChan := make(chan struct{})
+		jobId := uuid.New().String()
+		ctx, cancel := context.WithCancel(context.Background())
+		go worker(job.Command, &doneChan, o, s, jobId, ctx, cancel)
 	}
 	log.Printf("Finished: %s %v", c.Command, c.Arguments)
 }
@@ -120,7 +141,12 @@ func createDownloadHandler(o *Options, s *Status) http.HandlerFunc {
 			}
 		}
 		if o.ConcurrentCommands > 0 && runningCommands >= o.ConcurrentCommands {
-			log.Println("Too many commands running.")
+			// Print number of currently running commands in a nice green color.
+			log.Printf("\033[32mCurrently running %d commands, queuing %s\033[0m\n", runningCommands, c.Command)
+			// Print number of commands already in Qeueu in a nice yellow color.
+			log.Printf("\033[33mThere are now %d commands in queue.\033[0m\n", len(s.QueuedCommands) + 1)
+
+			s.QueuedCommands = append(s.QueuedCommands, Job{Command: c, StartTime: time.Now(), Status: "Queued"})
 			return
 		}
 
@@ -172,7 +198,7 @@ func createCancelHandler(o *Options, s *Status) http.HandlerFunc {
 }
 
 func main() {
-	concurrentCommands := flag.Int("c", 0, "Number of commands to run concurrently. 0 for unlimited.")
+	concurrentCommands := flag.Int("c", 1, "Number of commands to run concurrently. 0 for unlimited.")
 	flag.Parse()
 	options := &Options{ConcurrentCommands: *concurrentCommands}
 	status := &Status{RunningCommands: make(map[string]Job)}
